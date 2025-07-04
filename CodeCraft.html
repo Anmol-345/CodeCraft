@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CodeCraft - Online Code Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --dark-bg: #0f172a;
+      --panel-bg: #1e293b;
+      --border-color: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --success: #10b981;
+      --success-hover: #059669;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--dark-bg);
+      color: var(--text-primary);
+    }
+    
+    .navbar {
+      background-color: var(--panel-bg);
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text-primary);
+    }
+    
+    .logo i {
+      color: var(--primary);
+    }
+    
+    .nav-left {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    .nav-right {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .editor-section {
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+      background-color: var(--dark-bg);
+    }
+    
+    .editor-container {
+      padding: 15px;
+      height: 100%;
+    }
+    
+    textarea {
+      height: calc(100% - 40px);
+      resize: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      background-color: var(--panel-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      line-height: 1.5;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+    
+    .code-box {
+      display: none;
+      height: 100%;
+    }
+    
+    .code-box.active {
+      display: block;
+    }
+    
+    .code-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    .code-label i {
+      font-size: 16px;
+    }
+    
+    iframe {
+      width: 100%;
+      height: calc(100% - 40px);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: white;
+      margin-top: 10px;
+    }
+    
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .preview-title {
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .container-fluid {
+      height: 100vh;
+      padding: 0;
+    }
+    
+    .row {
+      height: 100%;
+      margin: 0;
+    }
+    
+    .col-md-6 {
+      padding: 0;
+    }
+    
+    .btn-group {
+      margin: 0;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 2px;
+    }
+    
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+    
+    .toggle-btn:hover {
+      color: var(--text-primary);
+    }
+    
+    .toggle-btn.active {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn {
+      border-radius: 6px;
+      font-weight: 500;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+    
+    .btn-success {
+      background-color: var(--success);
+      border-color: var(--success);
+    }
+    
+    .btn-success:hover {
+      background-color: var(--success-hover);
+      border-color: var(--success-hover);
+    }
+    
+    .btn-outline-secondary {
+      color: var(--text-secondary);
+      border-color: var(--border-color);
+      background-color: transparent;
+    }
+    
+    .btn-outline-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+    
+    .divider {
+      width: 1px;
+      height: 24px;
+      background-color: var(--border-color);
+      margin: 0 5px;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--panel-bg);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
+    
+    /* Alert styles */
+    .alert {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      padding: 12px 16px;
+      border-radius: 6px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 300px;
+      animation: slideIn 0.3s ease forwards;
+    }
+    
+    .alert-warning {
+      background-color: var(--warning);
+      color: white;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="nav-left">
+      <div class="logo">
+        <i class="fas fa-code"></i>
+        <span>CodeCraft</span>
+      </div>
+      <div class="divider"></div>
+      <div class="btn-group" role="group">
+        <button class="toggle-btn active" data-target="#htmlBox">
+          <i class="fab fa-html5"></i> HTML
+        </button>
+        <button class="toggle-btn" data-target="#cssBox">
+          <i class="fab fa-css3-alt"></i> CSS
+        </button>
+        <button class="toggle-btn" data-target="#jsBox">
+          <i class="fab fa-js"></i> JS
+        </button>
+      </div>
+    </div>
+    <div class="nav-right">
+      <button id="run" class="btn btn-success">
+        <i class="fas fa-play"></i> Run
+      </button>
+      <button id="reset" class="btn btn-outline-secondary">
+        <i class="fas fa-redo"></i> Reset
+      </button>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row">
+
+      <!-- Code Panel -->
+      <div class="col-md-6 editor-section">
+        <div class="editor-container">
+          <div id="htmlBox" class="code-box active">
+            <div class="code-label">
+              <i class="fab fa-html5"></i> HTML
+            </div>
+            <textarea id="htmlPart" class="form-control">
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+</head>
+<body>
+  <h1>Click Me!</h1>
+</body>
+</html>
+            </textarea>
+          </div>
+
+          <div id="cssBox" class="code-box">
+            <div class="code-label">
+              <i class="fab fa-css3-alt"></i> CSS
+            </div>
+            <textarea id="cssPart" class="form-control">
+h1 {
+  color: red;
+  cursor: pointer;
+}
+            </textarea>
+          </div>
+
+          <div id="jsBox" class="code-box">
+            <div class="code-label">
+              <i class="fab fa-js"></i> JavaScript
+            </div>
+            <textarea id="jsPart" class="form-control">
+document.querySelector("h1").addEventListener("click", function() {
+  alert("H1 Clicked!");
+});
+            </textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Panel -->
+      <div class="col-md-6 editor-section">
+        <div class="editor-container">
+          <div class="preview-header">
+            <div class="preview-title">
+              <i class="fas fa-play-circle"></i> Preview
+            </div>
+          </div>
+          <iframe id="previewFrame"></iframe>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Toggle buttons
+    $(".toggle-btn").click(function () {
+      $(".toggle-btn").removeClass("active");
+      $(this).addClass("active");
+      $(".code-box").removeClass("active");
+      $($(this).data("target")).addClass("active");
+    });
+
+    // Run Button
+    $("#run").click(function() {
+      let htmlContent = $("#htmlPart").val();
+      let cssContent = "<style>\n" + $("#cssPart").val() + "\n</style>";
+      let jsContent = `<script>\n${$("#jsPart").val()}\n<\/script>`;
+
+      let finalCode = "";
+
+      if (htmlContent.includes("</head>") && htmlContent.includes("</body>")) {
+        finalCode =
+          htmlContent.split("</head>")[0] + cssContent + "</head>" +
+          htmlContent.split("</body>")[0].split("</head>").pop() +
+          jsContent + "</body></html>";
+      } else {
+        showAlert("Make sure your HTML includes <head> and <body> tags.");
+        return;
+      }
+
+      let iframe = document.getElementById("previewFrame");
+      iframe.contentDocument.open();
+      iframe.contentDocument.write(finalCode);
+      iframe.contentDocument.close();
+    });
+
+    // Reset Button
+    $("#reset").click(function() {
+      location.reload();
+    });
+
+    // Show alert function
+    function showAlert(message) {
+      // Remove any existing alerts
+      $('.alert').remove();
+      
+      // Create alert element
+      const alert = $('<div class="alert alert-warning"></div>');
+      alert.html(`<i class="fas fa-exclamation-triangle"></i> ${message}`);
+      
+      // Add to body
+      $('body').append(alert);
+      
+      // Auto remove after 3 seconds
+      setTimeout(function() {
+        alert.fadeOut(300, function() {
+          $(this).remove();
+        });
+      }, 3000);
+    }
+  </script>
+
+</body>
+</html>
